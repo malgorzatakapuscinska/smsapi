@@ -27,11 +27,8 @@ var _antd = antd,
     Input = _antd.Input,
     Select = _antd.Select,
     Button = _antd.Button,
-    Checkbox = _antd.Checkbox;
-var axiosConfig = {
-  url: "http://localhost:3001/contacts"
-};
-var axiosInstance = axios.create(axiosConfig);
+    Checkbox = _antd.Checkbox,
+    Alert = _antd.Alert;
 
 var App =
 /*#__PURE__*/
@@ -57,16 +54,23 @@ function (_React$Component) {
           var stringifyValues = JSON.stringify(values);
           console.log(stringifyValues);
           axios.post('http://localhost:3001/contacts/add', values).then(function (response) {
-            return console.log(response);
+            console.log(response);
+            response && response.data !== "500 Internal Server Error" ? _this.setState(_objectSpread({}, _this.state, {
+              contactSaved: true,
+              serverError: ''
+            }), console.log(_this.state)) : _this.setState(_objectSpread({}, _this.state, {
+              contactSaved: false,
+              serverError: response.data
+            }), console.log(_this.state));
           });
-        } else console.log(error);
+        }
       });
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validatePhoneNumber", function (_rule, _value, callback) {
       _this.state.contacts.find(function (contact) {
         return contact.phone_number === _this.props.form.getFieldValue('phone_number');
-      }) === undefined ? callback() : callback("Istnieje użytkownik o podanym numerze telefonu. Proroszę wpisać inny numer telefonu lub skontaktować się z administratorem");
+      }) === undefined ? callback() : callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem");
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validateEmail", function (_rule, _value, callback) {
@@ -75,9 +79,15 @@ function (_React$Component) {
       }) === undefined ? callback() : callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem");
     });
 
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "onClose", function () {
+      console.log("closed");
+    });
+
     _this.state = {
       contacts: [],
-      groups: []
+      groups: [],
+      contactSaved: false,
+      serverError: ''
     };
     return _this;
   }
@@ -88,20 +98,24 @@ function (_React$Component) {
       var _this2 = this;
 
       axios.get("http://localhost:3001/contacts").then(function (response) {
-        _this2.setState(_objectSpread({}, _this2.state, {
-          contacts: response.data
+        response.data !== "404 not found" ? _this2.setState(_objectSpread({}, _this2.state, {
+          contacts: response.data,
+          serverError: ''
         }), function () {
           return console.log(_this2.state);
-        });
-      }).catch(function (error) {
-        return console.log(error);
+        }) : _this2.setState(_objectSpread({}, _this2.state, {
+          serverError: response.data
+        }), console.log(_this2.state));
       });
       axios.get("http://localhost:3001/groups").then(function (response) {
-        _this2.setState(_objectSpread({}, _this2.state, {
-          groups: response.data
+        response.data !== "404 not found" ? _this2.setState(_objectSpread({}, _this2.state, {
+          groups: response.data,
+          serverError: ''
         }), function () {
           return console.log(_this2.state);
-        });
+        }) : _this2.setState(_objectSpread({}, _this2.state, {
+          serverError: response.data
+        }), console.log(_this2.state));
       });
     }
   }, {
@@ -110,21 +124,40 @@ function (_React$Component) {
       var _this$props$form = this.props.form,
           getFieldDecorator = _this$props$form.getFieldDecorator,
           validateFields = _this$props$form.validateFields;
-      var groups = this.state.groups;
+      var _this$state = this.state,
+          groups = _this$state.groups,
+          contactSaved = _this$state.contactSaved,
+          serverError = _this$state.serverError;
+      console.log(groups);
+      console.log(this.state);
       return React.createElement("div", {
         className: "container"
-      }, React.createElement(Form, {
+      }, serverError === "404 not found" ? React.createElement(Alert, {
+        message: "Przepraszamy rejestracja jest chwilowo niemo\u017Cliwa. Spr\xF3buj ponownie p\xF3\u017Aniej",
+        type: "error",
+        className: "ant-alert-serverError"
+      }) : React.createElement(Form, {
         layout: "horizontal",
         onSubmit: this.handlesubmit,
-        style: {
-          width: "50%"
-        }
-      }, React.createElement(Form.Item, {
+        className: "ant-form--centered"
+      }, contactSaved === true ? React.createElement(Alert, {
+        message: "Dane zapisane! Dzi\u0119kujemy za zapisanie si\u0119 do listy subskrybent\xF3w",
+        type: "success",
+        closable: true,
+        onClose: this.onClose,
+        className: "ant-alert-centered"
+      }) : null, serverError === "500 Internal Server Error" ? React.createElement(Alert, {
+        message: "Przykro nam! Nie uda\u0142o si\u0119 zapisa\u0107 danych spr\xF3buj ponownie p\xF3\u017Aniej",
+        type: "error",
+        closable: true,
+        onClose: this.onClose,
+        className: "ant-alert-centered"
+      }) : null, React.createElement("h1", null, "Zarejestruj si\u0119 na newsletter"), React.createElement(Form.Item, {
         label: "Imi\u0119"
       }, getFieldDecorator("first_name", {
         rules: [{
           required: true,
-          message: "Wpisz swoje imę!"
+          message: "Wpisz swoje imię!"
         }]
       })(React.createElement(Input, {
         placeholder: "Jan"
@@ -138,7 +171,8 @@ function (_React$Component) {
       })(React.createElement(Input, {
         placeholder: "Kowalski"
       }))), React.createElement(Form.Item, {
-        label: "Numer telefonu kom\xF3rkowego wg wzoru: 48xxxxxxxxx"
+        label: "Numer telefonu kom\xF3rkowego wg wzoru: 48xxxxxxxxx",
+        className: "label-wordWrapped"
       }, getFieldDecorator("phone_number", {
         rules: [{
           required: true,
@@ -159,7 +193,7 @@ function (_React$Component) {
           message: "Wpisz twój adres e-mail"
         }, {
           type: 'email',
-          message: 'The input is not a valid e-mail addres'
+          message: 'Nieprawidłowy adres e-mail'
         }, {
           validator: this.validateEmail
         }]
@@ -185,7 +219,7 @@ function (_React$Component) {
           message: "Zgoda jest wymagana"
         }]
       })(React.createElement(Checkbox, null, "Zgoda na przetwarzanie ", React.createElement("a", {
-        href: ""
+        href: "zgoda.pdf"
       }, "danych osobowych")))), React.createElement(Form.Item, null, React.createElement(Button, {
         type: "primary",
         htmlType: "submit"

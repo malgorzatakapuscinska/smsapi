@@ -35,6 +35,7 @@ app.get("/contacts", function(req, res){
     })
     .catch(function(error) {
       console.log(error);
+      res.send("404 not found");
     })
   }
   getContactsList();
@@ -51,6 +52,7 @@ app.get("/groups", function(request, response){
     })
     .catch(function(error) {
       console.log(error);
+      response.send("404 not found")
     })
   }
   getContactsGroups();
@@ -65,19 +67,18 @@ app.post("/contacts/add", function(request, response) {
     .execute()
     .then(function(result) {
       console.log(result);
-      response.send(result);
+      /*response.send(result);*/
     })
     .catch(function(error) {
-      response.send(error);
-      console.log(error);
+      response.send('500 Internal Server Error');
+      console.log(error.message);
     })
   }
 
   addContact();
-  /*function addContact() {
-
-  }*/
 })
+
+
 
 var server = app.listen(3001, 'localhost', function() {
   var host = server.address().address;
