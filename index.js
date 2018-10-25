@@ -4,20 +4,21 @@ class App extends React.Component {
   constructor (props){
     super(props);
     this.state = {
-      contacts: [],
+      /*contacts: [],*/
       groups: [],
+      isPhoneExist: false,
       contactSaved: false,
       serverError: ''
     }
   }
 
   componentDidMount () {
-    axios.get("http://localhost:3001/contacts")
+    /*axios.get("http://localhost:3001/contacts")
       .then((response) => {
         (response.data !== "404 not found") ?
         this.setState({...this.state, contacts: response.data, serverError: ''}, () => console.log(this.state)) :
         this.setState({...this.state, serverError: response.data}, console.log(this.state));
-      })
+      })*/
     axios.get("http://localhost:3001/groups")
       .then((response) => {
         (response.data !== "404 not found") ? this.setState({...this.state, groups: response.data, serverError: ''}, () => console.log(this.state)) :
@@ -45,14 +46,71 @@ class App extends React.Component {
     })
   }
 
+  isContactExist = (phone) => {
+    return new Promise((resolve, reject) => {
+      axios.post("http://localhost:3001/phone/check", phone)
+      .then((response) => {
+        console.log("server response" + response.data);
+        (response.data && response.data === "Phone number exists in database") ?
+        resolve(response.data) : reject(response.data);
+      })
+    })
+  }
+
   validatePhoneNumber = (_rule, _value, callback) => {
-    (this.state.contacts.find((contact) => contact.phone_number === this.props.form.getFieldValue('phone_number')) === undefined) ?
-    callback() : callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem");
+    console.log("phone " + this.props.form.getFieldValue('phone_number'));
+    let phoneNumber = {phone_number: this.props.form.getFieldValue('phone_number')};
+    console.log(phoneNumber.phone_number.length);
+
+    if (phoneNumber.phone_number.length === 11) {
+      this.isContactExist(phoneNumber)
+      .then((data) => {
+        this.setState({...this.state, isPhoneExist: true}, () => {
+          console.log(this.state);
+          (this.state.isPhoneExist === true) ?
+          callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem") :
+          callback();
+        });
+      })
+      .catch((data) => {
+        this.setState({...this.state, isPhoneExist: false}, () => console.log(this.state));
+      });
+    }
+  }
+
+  isEmailExist = (email) => {
+    return new Promise((resolve, reject) => {
+        axios.post("http://localhost:3001/email/check", email)
+        .then((response) => {
+          console.log("server response" + response.data);
+          (response.data && response.data === "Email exists in database") ?
+          resolve(response.data) : reject(response.data);
+        })
+    })
   }
 
   validateEmail = (_rule, _value, callback) => {
-    (this.state.contacts.find((contact) => contact.email === this.props.form.getFieldValue('email')) === undefined) ?
-    callback() : callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem");
+    console.log("e-mail " + this.props.form.getFieldValue('email'));
+    let email = {email: this.props.form.getFieldValue('email')};
+    console.log(email.email);
+
+    if (email) {
+      this.isEmailExist(email)
+      .then((data) => {
+        this.setState({...this.state, isEmailExist: true}, () => {
+          console.log(this.state);
+          (this.state.isEmailExist === true) ?
+          callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem") :
+          callback();
+        });
+      })
+      .catch((data) => {
+        this.setState({...this.state, isEmailExist: false}, () => console.log(this.state));
+      });
+    }
+
+    /*(this.state.contacts.find((contact) => contact.email === this.props.form.getFieldValue('email')) === undefined) ?
+    callback() : callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem");*/
   }
 
   onClose = () => {
@@ -107,6 +165,7 @@ class App extends React.Component {
             {getFieldDecorator("phone_number",{
               rules: [
                 {required: true, message: "Wpisz twój numer telefonu!"},
+                {max: 11, message: "Numer telefonu zbyt długi - maksimum 11 znaków"},
                 {pattern: new RegExp(/48[0-9]{9}/), message: "Niepoprawny numer telefonu"},
                 {validator: this.validatePhoneNumber}
               ],

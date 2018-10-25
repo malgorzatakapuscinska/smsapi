@@ -24,6 +24,46 @@ app.use(cors({
   'preflightContinue': false
 }));
 
+app.post('/phone/check', function(request, response) {
+  console.log(request.body);
+  console.log(request.body.phone_number)
+  function isPhoneExist () {
+    return smsapi.contacts
+    .list()
+    .phoneNumber(request.body.phone_number)
+    .execute()
+    .then(function(result) {
+      console.log(result);
+      (result.size !== 0) ? response.send("Phone number exists in database") : response.send("Phone number OK")
+    })
+    .catch(function(error) {
+      console.log(error);
+      response.send('500 Internal Server Error');
+    })
+  }
+  isPhoneExist();
+})
+
+app.post('/email/check', function(request, response) {
+  console.log(request.body);
+  console.log(request.body.email)
+  function isEmailExist () {
+    return smsapi.contacts
+    .list()
+    .email(request.body.email)
+    .execute()
+    .then(function(result) {
+      console.log(result);
+      (result.size !== 0) ? response.send("Email exists in database") : response.send("Email address OK")
+    })
+    .catch(function(error) {
+      console.log(error);
+      response.send('500 Internal Server Error');
+    })
+  }
+  isEmailExist();
+})
+
 app.get("/contacts", function(req, res){
   function getContactsList() {
     return smsapi.contacts
@@ -78,7 +118,13 @@ app.post("/contacts/add", function(request, response) {
   addContact();
 })
 
-
+/*app.delete("/contact/delete", function(request, response){
+  console.log(request.body);
+  function deleteContact() {
+    return smsapi.contacts
+    .delete(request.body)
+  }
+})*/
 
 var server = app.listen(3001, 'localhost', function() {
   var host = server.address().address;

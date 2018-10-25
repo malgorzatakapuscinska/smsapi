@@ -67,16 +67,75 @@ function (_React$Component) {
       });
     });
 
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "isContactExist", function (phone) {
+      return new Promise(function (resolve, reject) {
+        axios.post("http://localhost:3001/phone/check", phone).then(function (response) {
+          console.log("server response" + response.data);
+          response.data && response.data === "Phone number exists in database" ? resolve(response.data) : reject(response.data);
+        });
+      });
+    });
+
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validatePhoneNumber", function (_rule, _value, callback) {
-      _this.state.contacts.find(function (contact) {
-        return contact.phone_number === _this.props.form.getFieldValue('phone_number');
-      }) === undefined ? callback() : callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem");
+      console.log("phone " + _this.props.form.getFieldValue('phone_number'));
+      var phoneNumber = {
+        phone_number: _this.props.form.getFieldValue('phone_number')
+      };
+      console.log(phoneNumber.phone_number.length);
+
+      if (phoneNumber.phone_number.length === 11) {
+        _this.isContactExist(phoneNumber).then(function (data) {
+          _this.setState(_objectSpread({}, _this.state, {
+            isPhoneExist: true
+          }), function () {
+            console.log(_this.state);
+            _this.state.isPhoneExist === true ? callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem") : callback();
+          });
+        }).catch(function (data) {
+          _this.setState(_objectSpread({}, _this.state, {
+            isPhoneExist: false
+          }), function () {
+            return console.log(_this.state);
+          });
+        });
+      }
+    });
+
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "isEmailExist", function (email) {
+      return new Promise(function (resolve, reject) {
+        axios.post("http://localhost:3001/email/check", email).then(function (response) {
+          console.log("server response" + response.data);
+          response.data && response.data === "Email exists in database" ? resolve(response.data) : reject(response.data);
+        });
+      });
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validateEmail", function (_rule, _value, callback) {
-      _this.state.contacts.find(function (contact) {
-        return contact.email === _this.props.form.getFieldValue('email');
-      }) === undefined ? callback() : callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem");
+      console.log("e-mail " + _this.props.form.getFieldValue('email'));
+      var email = {
+        email: _this.props.form.getFieldValue('email')
+      };
+      console.log(email.email);
+
+      if (email) {
+        _this.isEmailExist(email).then(function (data) {
+          _this.setState(_objectSpread({}, _this.state, {
+            isEmailExist: true
+          }), function () {
+            console.log(_this.state);
+            _this.state.isEmailExist === true ? callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem") : callback();
+          });
+        }).catch(function (data) {
+          _this.setState(_objectSpread({}, _this.state, {
+            isEmailExist: false
+          }), function () {
+            return console.log(_this.state);
+          });
+        });
+      }
+      /*(this.state.contacts.find((contact) => contact.email === this.props.form.getFieldValue('email')) === undefined) ?
+      callback() : callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem");*/
+
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "onClose", function () {
@@ -84,8 +143,9 @@ function (_React$Component) {
     });
 
     _this.state = {
-      contacts: [],
+      /*contacts: [],*/
       groups: [],
+      isPhoneExist: false,
       contactSaved: false,
       serverError: ''
     };
@@ -97,16 +157,12 @@ function (_React$Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      axios.get("http://localhost:3001/contacts").then(function (response) {
-        response.data !== "404 not found" ? _this2.setState(_objectSpread({}, _this2.state, {
-          contacts: response.data,
-          serverError: ''
-        }), function () {
-          return console.log(_this2.state);
-        }) : _this2.setState(_objectSpread({}, _this2.state, {
-          serverError: response.data
-        }), console.log(_this2.state));
-      });
+      /*axios.get("http://localhost:3001/contacts")
+        .then((response) => {
+          (response.data !== "404 not found") ?
+          this.setState({...this.state, contacts: response.data, serverError: ''}, () => console.log(this.state)) :
+          this.setState({...this.state, serverError: response.data}, console.log(this.state));
+        })*/
       axios.get("http://localhost:3001/groups").then(function (response) {
         response.data !== "404 not found" ? _this2.setState(_objectSpread({}, _this2.state, {
           groups: response.data,
@@ -177,6 +233,9 @@ function (_React$Component) {
         rules: [{
           required: true,
           message: "Wpisz twój numer telefonu!"
+        }, {
+          max: 11,
+          message: "Numer telefonu zbyt długi - maksimum 11 znaków"
         }, {
           pattern: new RegExp(/48[0-9]{9}/),
           message: "Niepoprawny numer telefonu"
