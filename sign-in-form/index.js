@@ -7,6 +7,7 @@ class App extends React.Component {
       /*contacts: [],*/
       groups: [],
       isPhoneExist: false,
+      isEmailExist: false,
       contactSaved: false,
       serverError: ''
     }
@@ -29,6 +30,9 @@ class App extends React.Component {
   handlesubmit = (event) => {
     event.preventDefault();
     console.log(this.props);
+    this.isPhoneExist();
+
+    (this.)
     this.props.form.validateFields
       (  {force: true},(error, values) => {
         if (!error) {
@@ -46,36 +50,26 @@ class App extends React.Component {
     })
   }
 
-  isContactExist = (phone) => {
-    return new Promise((resolve, reject) => {
-      axios.post("http://localhost:3001/phone/check", phone)
+  isPhoneExist = () => {
+    console.log("phone " + this.props.form.getFieldValue('phone_number'));
+    let phoneNumber = {phone_number: this.props.form.getFieldValue('phone_number')};
+      axios.post("http://localhost:3001/phone/check", phoneNumber)
       .then((response) => {
         console.log("server response" + response.data);
-        (response.data && response.data === "Phone number exists in database") ?
-        resolve(response.data) : reject(response.data);
+        (response.data && response.data === "Phone number exists in database") ? true
+         /*this.setState({...this.state, isPhoneExist: true}, () => console.log(this.state))*/ : false
+         /*this.setState({...this.state, isPhoneExist: false}, () => console.log(this.state))*/;
       })
-    })
   }
 
   validatePhoneNumber = (_rule, _value, callback) => {
-    console.log("phone " + this.props.form.getFieldValue('phone_number'));
+  /*  console.log("phone " + this.props.form.getFieldValue('phone_number'));
     let phoneNumber = {phone_number: this.props.form.getFieldValue('phone_number')};
-    console.log(phoneNumber.phone_number.length);
+    console.log(phoneNumber.phone_number.length);*/
 
-    if (phoneNumber.phone_number.length === 11) {
-      this.isContactExist(phoneNumber)
-      .then((data) => {
-        this.setState({...this.state, isPhoneExist: true}, () => {
-          console.log(this.state);
-          (this.state.isPhoneExist === true) ?
-          callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem") :
-          callback();
-        });
-      })
-      .catch((data) => {
-        this.setState({...this.state, isPhoneExist: false}, () => console.log(this.state));
-      });
-    }
+    (this.state.isPhoneExist) ?
+        callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem") :
+        callback();
   }
 
   isEmailExist = (email) => {

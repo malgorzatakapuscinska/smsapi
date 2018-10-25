@@ -46,6 +46,8 @@ function (_React$Component) {
       event.preventDefault();
       console.log(_this.props);
 
+      _this.isPhoneExist();
+
       _this.props.form.validateFields({
         force: true
       }, function (error, values) {
@@ -67,38 +69,26 @@ function (_React$Component) {
       });
     });
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "isContactExist", function (phone) {
-      return new Promise(function (resolve, reject) {
-        axios.post("http://localhost:3001/phone/check", phone).then(function (response) {
-          console.log("server response" + response.data);
-          response.data && response.data === "Phone number exists in database" ? resolve(response.data) : reject(response.data);
-        });
-      });
-    });
-
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validatePhoneNumber", function (_rule, _value, callback) {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "isPhoneExist", function () {
       console.log("phone " + _this.props.form.getFieldValue('phone_number'));
       var phoneNumber = {
         phone_number: _this.props.form.getFieldValue('phone_number')
       };
-      console.log(phoneNumber.phone_number.length);
+      axios.post("http://localhost:3001/phone/check", phoneNumber).then(function (response) {
+        console.log("server response" + response.data);
+        response.data && response.data === "Phone number exists in database" ? true
+        /*this.setState({...this.state, isPhoneExist: true}, () => console.log(this.state))*/
+        : false
+        /*this.setState({...this.state, isPhoneExist: false}, () => console.log(this.state))*/
+        ;
+      });
+    });
 
-      if (phoneNumber.phone_number.length === 11) {
-        _this.isContactExist(phoneNumber).then(function (data) {
-          _this.setState(_objectSpread({}, _this.state, {
-            isPhoneExist: true
-          }), function () {
-            console.log(_this.state);
-            _this.state.isPhoneExist === true ? callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem") : callback();
-          });
-        }).catch(function (data) {
-          _this.setState(_objectSpread({}, _this.state, {
-            isPhoneExist: false
-          }), function () {
-            return console.log(_this.state);
-          });
-        });
-      }
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validatePhoneNumber", function (_rule, _value, callback) {
+      /*  console.log("phone " + this.props.form.getFieldValue('phone_number'));
+        let phoneNumber = {phone_number: this.props.form.getFieldValue('phone_number')};
+        console.log(phoneNumber.phone_number.length);*/
+      _this.state.isPhoneExist ? callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem") : callback();
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "isEmailExist", function (email) {
@@ -146,6 +136,7 @@ function (_React$Component) {
       /*contacts: [],*/
       groups: [],
       isPhoneExist: false,
+      isEmailExist: false,
       contactSaved: false,
       serverError: ''
     };
