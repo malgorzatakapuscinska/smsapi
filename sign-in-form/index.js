@@ -29,10 +29,18 @@ class App extends React.Component {
 
   handlesubmit = (event) => {
     event.preventDefault();
-    console.log(this.props);
-    this.isPhoneExist();
 
-    (this.)
+    // TODO: await the returned value
+    if (this.isPhoneExist()) {
+      this.setState({ isPhoneExist: true }, () => {
+        this.props.form.validateFieldsAndScroll(['phone_number'], {
+          force: true,
+          scroll: { offsetTop: 40 },
+        })
+      })
+      return
+    }
+
     this.props.form.validateFields
       (  {force: true},(error, values) => {
         if (!error) {
@@ -50,6 +58,8 @@ class App extends React.Component {
     })
   }
 
+  // TODO: make function async
+  // TODO: return boolean
   isPhoneExist = () => {
     console.log("phone " + this.props.form.getFieldValue('phone_number'));
     let phoneNumber = {phone_number: this.props.form.getFieldValue('phone_number')};
@@ -68,7 +78,7 @@ class App extends React.Component {
     console.log(phoneNumber.phone_number.length);*/
 
     (this.state.isPhoneExist) ?
-        callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem") :
+        this.setState({ isPhoneExist: false }, callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem")) :
         callback();
   }
 
