@@ -23,7 +23,7 @@ class App extends React.Component {
     axios.get("http://localhost:3001/groups")
       .then((response) => {
         (response.data !== "404 not found") ? this.setState({...this.state, groups: response.data, serverError: ''}, () => console.log(this.state)) :
-        this.setState({...this.state, serverError: response.data}, console.log(this.state));
+        this.setState({serverError: response.data}, console.log(this.state));
       })
   }
 
@@ -43,8 +43,8 @@ class App extends React.Component {
             .then((response) => {
               console.log(response);
               (response && response.data !== "500 Internal Server Error") ?
-              this.setState({...this.state, contactSaved: true, serverError: ''}, console.log(this.state)) :
-              this.setState({...this.state, contactSaved: false, serverError: response.data}, console.log(this.state));
+              this.setState({contactSaved: true, serverError: ''}, console.log(this.state)) :
+              this.setState({contactSaved: false, serverError: response.data}, console.log(this.state));
             });
         }
     })
@@ -91,7 +91,7 @@ class App extends React.Component {
     if (email) {
       this.isEmailExist(email)
       .then((data) => {
-        this.setState({...this.state, isEmailExist: true}, () => {
+        this.setState({isEmailExist: true}, () => {
           console.log(this.state);
           (this.state.isEmailExist === true) ?
           callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem") :
@@ -99,7 +99,7 @@ class App extends React.Component {
         });
       })
       .catch((data) => {
-        this.setState({...this.state, isEmailExist: false}, () => console.log(this.state));
+        this.setState({isEmailExist: false}, () => console.log(this.state));
       });
     }
 
