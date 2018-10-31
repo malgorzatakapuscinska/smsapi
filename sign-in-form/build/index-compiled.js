@@ -2,8 +2,6 @@
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -44,88 +42,67 @@ function (_React$Component) {
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "handlesubmit", function (event) {
       event.preventDefault();
-      console.log(_this.props);
 
-      _this.isPhoneExist();
-
-      _this.props.form.validateFields({
-        force: true
-      }, function (error, values) {
-        if (!error) {
-          console.log(values);
-          var stringifyValues = JSON.stringify(values);
-          console.log(stringifyValues);
-          axios.post('http://localhost:3001/contacts/add', values).then(function (response) {
-            console.log(response);
-            response && response.data !== "500 Internal Server Error" ? _this.setState(_objectSpread({}, _this.state, {
-              contactSaved: true,
-              serverError: ''
-            }), console.log(_this.state)) : _this.setState(_objectSpread({}, _this.state, {
-              contactSaved: false,
-              serverError: response.data
-            }), console.log(_this.state));
-          });
-        }
+      _this.isPhoneAndEmailExist().then(function (value) {
+        _this.props.form.validateFields({
+          force: true
+        }, function (error, values) {
+          if (!error) {
+            console.log(values);
+            var stringifyValues = JSON.stringify(values);
+            console.log(stringifyValues);
+            axios.post('http://localhost:3001/contacts/add', values).then(function (response) {
+              console.log(response);
+              response && response.data !== "500 Internal Server Error" ? _this.setState({
+                contactSaved: true,
+                serverError: ''
+              }, console.log(_this.state)) : _this.setState({
+                contactSaved: false,
+                serverError: response.data
+              }, console.log(_this.state));
+            });
+          }
+        });
       });
     });
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "isPhoneExist", function () {
-      console.log("phone " + _this.props.form.getFieldValue('phone_number'));
-      var phoneNumber = {
-        phone_number: _this.props.form.getFieldValue('phone_number')
-      };
-      axios.post("http://localhost:3001/phone/check", phoneNumber).then(function (response) {
-        console.log("server response" + response.data);
-        response.data && response.data === "Phone number exists in database" ? true
-        /*this.setState({...this.state, isPhoneExist: true}, () => console.log(this.state))*/
-        : false
-        /*this.setState({...this.state, isPhoneExist: false}, () => console.log(this.state))*/
-        ;
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "isPhoneAndEmailExist", function () {
+      return new Promise(function (resolve, reject) {
+        var valuesToValidate = {
+          phone_number: _this.props.form.getFieldValue('phone_number'),
+          email: _this.props.form.getFieldValue('email')
+        };
+        console.log(valuesToValidate);
+        axios.post("http://localhost:3001/validation", valuesToValidate).then(function (response) {
+          console.log('server response validation: ' + response.data);
+          response.data.phone_number === 'exists' ? _this.setState({
+            isPhoneExist: true
+          }, function () {
+            return console.log(_this.state);
+          }) : null;
+          response.data.email === 'exists' ? _this.setState({
+            isEmailExist: true
+          }, function () {
+            return console.log(_this.state);
+          }) : null;
+          resolve('done');
+        }).catch(function (error) {
+          console.log(error);
+          reject(error);
+        });
       });
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validatePhoneNumber", function (_rule, _value, callback) {
-      /*  console.log("phone " + this.props.form.getFieldValue('phone_number'));
-        let phoneNumber = {phone_number: this.props.form.getFieldValue('phone_number')};
-        console.log(phoneNumber.phone_number.length);*/
-      _this.state.isPhoneExist ? callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem") : callback();
-    });
-
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "isEmailExist", function (email) {
-      return new Promise(function (resolve, reject) {
-        axios.post("http://localhost:3001/email/check", email).then(function (response) {
-          console.log("server response" + response.data);
-          response.data && response.data === "Email exists in database" ? resolve(response.data) : reject(response.data);
-        });
-      });
+      _this.state.isPhoneExist ? _this.setState({
+        isPhoneExist: false
+      }, callback("Istnieje użytkownik o podanym numerze telefonu. Proszę wpisać inny numer telefonu lub skontaktować się z administratorem")) : callback();
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validateEmail", function (_rule, _value, callback) {
-      console.log("e-mail " + _this.props.form.getFieldValue('email'));
-      var email = {
-        email: _this.props.form.getFieldValue('email')
-      };
-      console.log(email.email);
-
-      if (email) {
-        _this.isEmailExist(email).then(function (data) {
-          _this.setState(_objectSpread({}, _this.state, {
-            isEmailExist: true
-          }), function () {
-            console.log(_this.state);
-            _this.state.isEmailExist === true ? callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem") : callback();
-          });
-        }).catch(function (data) {
-          _this.setState(_objectSpread({}, _this.state, {
-            isEmailExist: false
-          }), function () {
-            return console.log(_this.state);
-          });
-        });
-      }
-      /*(this.state.contacts.find((contact) => contact.email === this.props.form.getFieldValue('email')) === undefined) ?
-      callback() : callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem");*/
-
+      _this.state.isEmailExist ? _this.setState({
+        isEmailExist: false
+      }, callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem")) : callback();
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "onClose", function () {
@@ -133,7 +110,6 @@ function (_React$Component) {
     });
 
     _this.state = {
-      /*contacts: [],*/
       groups: [],
       isPhoneExist: false,
       isEmailExist: false,
@@ -148,21 +124,15 @@ function (_React$Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      /*axios.get("http://localhost:3001/contacts")
-        .then((response) => {
-          (response.data !== "404 not found") ?
-          this.setState({...this.state, contacts: response.data, serverError: ''}, () => console.log(this.state)) :
-          this.setState({...this.state, serverError: response.data}, console.log(this.state));
-        })*/
       axios.get("http://localhost:3001/groups").then(function (response) {
-        response.data !== "404 not found" ? _this2.setState(_objectSpread({}, _this2.state, {
+        response.data !== "404 not found" ? _this2.setState({
           groups: response.data,
           serverError: ''
-        }), function () {
+        }, function () {
           return console.log(_this2.state);
-        }) : _this2.setState(_objectSpread({}, _this2.state, {
+        }) : _this2.setState({
           serverError: response.data
-        }), console.log(_this2.state));
+        }, console.log(_this2.state));
       });
     }
   }, {
@@ -244,6 +214,9 @@ function (_React$Component) {
         }, {
           type: 'email',
           message: 'Nieprawidłowy adres e-mail'
+        }, {
+          pattern: new RegExp(/^[a-z\d]+[\w\d.-]*@(?:[a-z\d]+[a-z\d-]+\.){1,5}[a-z]{2,6}$/i),
+          message: "Nieprawidłowy adres e-mail"
         }, {
           validator: this.validateEmail
         }]

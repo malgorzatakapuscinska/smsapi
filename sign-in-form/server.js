@@ -1,9 +1,10 @@
-var express=require('express');
-var request=require('request');
-var rp=require('request-promise');
-var path=require('path');
-var cors=require('cors');
-var bodyParser = require('body-parser');
+const express=require('express');
+const request=require('request');
+const rp=require('request-promise');
+const path=require('path');
+const cors=require('cors');
+const bodyParser = require('body-parser');
+const { check, validationResult } = require('express-validator/check');
 var SMSAPI = require('smsapi');
 
 smsapi = new SMSAPI({
@@ -12,7 +13,7 @@ smsapi = new SMSAPI({
   }
 });
 
-var app = express();
+const app = express();
 app.use(bodyParser.json())
 
 
@@ -24,62 +25,65 @@ app.use(cors({
   'preflightContinue': false
 }));
 
-app.post('/phone/check', function(request, response) {
+app.post('/validation', function(request, response) {
   console.log(request.body);
   console.log(request.body.phone_number)
-  function isPhoneExist () {
+  let checkResults = {};
+  function validateEmailandPhone() {
     return smsapi.contacts
     .list()
     .phoneNumber(request.body.phone_number)
     .execute()
     .then(function(result) {
+      console.log("first request result")
       console.log(result);
-      (result.size !== 0) ? response.send("Phone number exists in database") : response.send("Phone number OK")
+      console.log(result.size);
+      if (result.size !== 0) {
+          checkResults.phone_number = 'exists';
+          console.log(checkResults);
+          isEmailExist();
+      }
+      else {
+        checkResults.phone_number = 'ok';
+        isEmailExist();
+      }
     })
     .catch(function(error) {
       console.log(error);
       response.send('500 Internal Server Error');
     })
   }
-  isPhoneExist();
-})
 
-app.post('/email/check', function(request, response) {
   console.log(request.body);
-  console.log(request.body.email)
+  console.log(request.body.email);
+
   function isEmailExist () {
     return smsapi.contacts
     .list()
     .email(request.body.email)
     .execute()
     .then(function(result) {
+      console.log('Second request result')
       console.log(result);
-      (result.size !== 0) ? response.send("Email exists in database") : response.send("Email address OK")
+      if (result.size !== 0) {
+        checkResults.email = 'exists';
+        console.log(checkResults);
+        response.send(checkResults);
+        }
+      else {
+        checkResults.email = 'ok';
+        console.log(checkResults)
+        response.send(checkResults);
+      }
     })
     .catch(function(error) {
       console.log(error);
       response.send('500 Internal Server Error');
     })
   }
-  isEmailExist();
-})
 
-app.get("/contacts", function(req, res){
-  function getContactsList() {
-    return smsapi.contacts
-    .list()
-    .execute()
-    .then (function(result) {
-      console.log(result.collection);
-      res.send(result.collection);
-    })
-    .catch(function(error) {
-      console.log(error);
-      res.send("404 not found");
-    })
-  }
-  getContactsList();
-});
+  validateEmailandPhone();
+})
 
 app.get("/groups", function(request, response){
   function getContactsGroups() {
@@ -107,7 +111,7 @@ app.post("/contacts/add", function(request, response) {
     .execute()
     .then(function(result) {
       console.log(result);
-      /*response.send(result);*/
+      response.send("Data saved correct");
     })
     .catch(function(error) {
       response.send('500 Internal Server Error');
@@ -116,15 +120,8 @@ app.post("/contacts/add", function(request, response) {
   }
 
   addContact();
-})
+});
 
-/*app.delete("/contact/delete", function(request, response){
-  console.log(request.body);
-  function deleteContact() {
-    return smsapi.contacts
-    .delete(request.body)
-  }
-})*/
 
 var server = app.listen(3001, 'localhost', function() {
   var host = server.address().address;
