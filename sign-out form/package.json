@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "startAll": "npm-run-all -p server start watch:sass",
+    "startAll": "npm-run-all -p server start watch:sass startNodemon",
     "server": "http-server --cors",
     "start": "babel index.js --watch --out-file build/index-compiled.js",
     "watch:sass": "node-sass --output-style expanded sass/style.scss css/style.css --watch",

@@ -42,9 +42,27 @@ function (_React$Component) {
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "handlesubmit", function (event) {
       event.preventDefault();
+      var phoneNumber = {
+        phone_number: _this.props.form.getFieldValue('phone_number')
+      };
+      console.log(phoneNumber);
+
+      _this.props.form.validateFields(function (error, values) {
+        if (!error) {
+          axios.post("http://localhost:3001/contact/delete", phoneNumber).then(function (response) {
+            _this.setState({
+              userRemoved: true
+            }, function () {
+              return console.log(_this.state);
+            });
+          });
+        }
+      });
     });
 
-    _this.state = {};
+    _this.state = {
+      userRemoved: false
+    };
     return _this;
   }
 
@@ -54,11 +72,6 @@ function (_React$Component) {
       var _this$props$form = this.props.form,
           getFieldDecorator = _this$props$form.getFieldDecorator,
           validateFields = _this$props$form.validateFields;
-      var _this$state = this.state,
-          groups = _this$state.groups,
-          contactSaved = _this$state.contactSaved,
-          serverError = _this$state.serverError;
-      console.log(groups);
       console.log(this.state);
       return React.createElement("div", {
         className: "container"
@@ -66,7 +79,13 @@ function (_React$Component) {
         layout: "horizontal",
         onSubmit: this.handlesubmit,
         className: "ant-form--centered"
-      }, React.createElement(Form.Item, {
+      }, this.state.userRemoved === true ? React.createElement(Alert, {
+        message: "Subskrypcja anulowana. Dzi\u0119kujemy za zg\u0142oszenie",
+        type: "success",
+        closable: true,
+        onClose: this.onClose,
+        className: "ant-alert-centered"
+      }) : null, React.createElement("h1", null, " Aby wypisa\u0107 si\u0119 z subskrypcji podaj numer telefonu u\u017Cyty podczas rejestracji "), React.createElement(Form.Item, {
         label: "Numer telefonu kom\xF3rkowego wg wzoru: 48xxxxxxxxx",
         className: "label-wordWrapped"
       }, getFieldDecorator("phone_number", {

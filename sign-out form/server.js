@@ -1,10 +1,10 @@
-var express=require('express');
-var request=require('request');
-var rp=require('request-promise');
-var path=require('path');
-var cors=require('cors');
-var bodyParser = require('body-parser');
-var SMSAPI = require('smsapi');
+const express=require('express');
+const request=require('request');
+const rp=require('request-promise');
+const path=require('path');
+const cors=require('cors');
+const bodyParser = require('body-parser');
+const SMSAPI = require('smsapi');
 
 smsapi = new SMSAPI({
   oauth: {
@@ -12,9 +12,9 @@ smsapi = new SMSAPI({
   }
 });
 
-var app = express();
+const app = express();
 app.use(bodyParser.json())
-
+app.use('/static', express.static(path.join(__dirname, 'public')))
 
 app.use(cors({
   'allowedHeaders': ['sessionId', 'Content-Type'],
@@ -26,12 +26,41 @@ app.use(cors({
 
 
 
-app.delete("/contact/delete", function(request, response){
+app.post("/contact/delete", function(request, response){
+  let contactId = '';
   console.log(request.body);
-  function deleteContact() {
+  function getContactIdandDelete() {
     return smsapi.contacts
-    .delete(request.body)
+    .list()
+    .phoneNumber(request.body.phone_number)
+    .execute()
+    .then(function(result) {
+        console.log(result.size)
+        console.log(result.collection);
+
+      if (result.size !== 0) {
+        console.log(result.collection[0].id)
+        contactId = result.collection[0].id;
+        console.log('I am your id: ' + contactId);
+        contactDelete(contactId);
+      } else response.send('Contact not found')
+    })
+
   }
+  function contactDelete(number) {
+    console.log("contact id to remove")
+    console.log(number);
+    return smsapi.contacts
+    .delete(number)
+    .execute()
+    .then(function(result) {
+      response.send('contact sucessfully deleted');
+    })
+    .catch(function(error) {
+      response.send("Error encountered")
+    })
+  }
+  getContactIdandDelete();
 })
 
 var server = app.listen(3001, 'localhost', function() {
