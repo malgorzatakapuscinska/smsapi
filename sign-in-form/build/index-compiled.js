@@ -43,26 +43,32 @@ function (_React$Component) {
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "handlesubmit", function (event) {
       event.preventDefault();
 
-      _this.isPhoneAndEmailExist().then(function (value) {
-        _this.props.form.validateFields({
-          force: true
-        }, function (error, values) {
-          if (!error) {
-            console.log(values);
-            var stringifyValues = JSON.stringify(values);
-            console.log(stringifyValues);
-            axios.post('http://localhost:3001/contacts/add', values).then(function (response) {
-              console.log(response);
-              response && response.data !== "500 Internal Server Error" ? _this.setState({
-                contactSaved: true,
-                serverError: ''
-              }, console.log(_this.state)) : _this.setState({
-                contactSaved: false,
-                serverError: response.data
-              }, console.log(_this.state));
+      _this.props.form.validateFields({
+        force: true
+      }, function (error, values) {
+        if (!error) {
+          _this.isPhoneAndEmailExist().then(function (value) {
+            _this.props.form.validateFields({
+              force: true
+            }, function (error, values) {
+              if (!error) {
+                console.log(values);
+                var stringifyValues = JSON.stringify(values);
+                console.log(stringifyValues);
+                axios.post('http://localhost:3001/contacts/add', values).then(function (response) {
+                  console.log(response);
+                  response && response.data !== "500 Internal Server Error" ? _this.setState({
+                    contactSaved: true,
+                    serverError: ''
+                  }, console.log(_this.state)) : _this.setState({
+                    contactSaved: false,
+                    serverError: response.data
+                  }, console.log(_this.state));
+                });
+              }
             });
-          }
-        });
+          });
+        }
       });
     });
 
@@ -105,6 +111,10 @@ function (_React$Component) {
       }, callback("Istnieje użytkownik o podanym adresie e-mail. Proszę użyc innego adresu e-mail lub skontaktować się z administratorem")) : callback();
     });
 
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "validateTerms", function (_rule, value, callback) {
+      return value !== true ? callback('Please accept the terms and conditions') : callback();
+    });
+
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "onClose", function () {
       console.log("closed");
     });
@@ -145,6 +155,7 @@ function (_React$Component) {
           groups = _this$state.groups,
           contactSaved = _this$state.contactSaved,
           serverError = _this$state.serverError;
+      console.log('I am back');
       console.log(groups);
       console.log(this.state);
       return React.createElement("div", {
@@ -238,7 +249,7 @@ function (_React$Component) {
         }, group.name);
       })))), React.createElement(Form.Item, null, getFieldDecorator("agreement", {
         rules: [{
-          required: true,
+          validator: this.validateTerms,
           message: "Zgoda jest wymagana"
         }]
       })(React.createElement(Checkbox, null, "Zgoda na przetwarzanie ", React.createElement("a", {

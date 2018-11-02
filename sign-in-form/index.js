@@ -23,22 +23,26 @@ class App extends React.Component {
 
   handlesubmit = (event) => {
     event.preventDefault();
-    this.isPhoneAndEmailExist()
-    .then((value) => {
-        this.props.form.validateFields({force: true},(error,values) => {
-            if (!error) {
-              console.log(values);
-              const stringifyValues = JSON.stringify(values);
-              console.log(stringifyValues);
-              axios.post('http://localhost:3001/contacts/add',values)
-                .then((response) => {
-                  console.log(response);
-                  (response && response.data !== "500 Internal Server Error") ?
-                  this.setState({contactSaved: true, serverError: ''}, console.log(this.state)) :
-                  this.setState({contactSaved: false, serverError: response.data}, console.log(this.state));
-                });
-            }
+    this.props.form.validateFields({force: true},(error,values) => {
+      if(!error) {
+        this.isPhoneAndEmailExist()
+        .then((value) => {
+            this.props.form.validateFields({force: true},(error,values) => {
+                if (!error) {
+                  console.log(values);
+                  const stringifyValues = JSON.stringify(values);
+                  console.log(stringifyValues);
+                  axios.post('http://localhost:3001/contacts/add',values)
+                    .then((response) => {
+                      console.log(response);
+                      (response && response.data !== "500 Internal Server Error") ?
+                      this.setState({contactSaved: true, serverError: ''}, console.log(this.state)) :
+                      this.setState({contactSaved: false, serverError: response.data}, console.log(this.state));
+                    });
+                }
+            })
         })
+      }
     })
   }
 
@@ -74,6 +78,8 @@ class App extends React.Component {
     callback();
   }
 
+  validateTerms = (_rule, value, callback) => (value !== true ? callback('Please accept the terms and conditions') : callback())
+
   onClose = () => {
     console.log("closed");
   }
@@ -81,6 +87,7 @@ class App extends React.Component {
   render () {
     const {getFieldDecorator, validateFields} = this.props.form;
     const {groups, contactSaved, serverError} = this.state;
+    console.log('I am back');
     console.log(groups);
     console.log(this.state);
     return (
@@ -153,8 +160,10 @@ class App extends React.Component {
             </Select>)}
           </Form.Item>
           <Form.Item>
-            {getFieldDecorator("agreement", {rules: [{required: true, message: "Zgoda jest wymagana"}],
-          })(<Checkbox>Zgoda na przetwarzanie <a href="zgoda.pdf">danych osobowych</a></Checkbox>)}
+            {getFieldDecorator("agreement", {rules:[
+              {validator: this.validateTerms, message: "Zgoda jest wymagana"}
+            ],
+          })(<Checkbox >Zgoda na przetwarzanie <a href="zgoda.pdf">danych osobowych</a></Checkbox>)}
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">Subskrybuj</Button>

@@ -50,8 +50,15 @@ function (_React$Component) {
       _this.props.form.validateFields(function (error, values) {
         if (!error) {
           axios.post("http://localhost:3001/contact/delete", phoneNumber).then(function (response) {
-            _this.setState({
-              userRemoved: true
+            console.log(response.data);
+            response.data !== "Contact not found" ? _this.setState({
+              userRemoved: true,
+              userExists: false
+            }, function () {
+              return console.log(_this.state);
+            }) : _this.setState({
+              userRemoved: false,
+              userExists: false
             }, function () {
               return console.log(_this.state);
             });
@@ -61,7 +68,8 @@ function (_React$Component) {
     });
 
     _this.state = {
-      userRemoved: false
+      userRemoved: false,
+      userExists: true
     };
     return _this;
   }
@@ -82,6 +90,12 @@ function (_React$Component) {
       }, this.state.userRemoved === true ? React.createElement(Alert, {
         message: "Subskrypcja anulowana. Dzi\u0119kujemy za zg\u0142oszenie",
         type: "success",
+        closable: true,
+        onClose: this.onClose,
+        className: "ant-alert-centered"
+      }) : null, this.state.userExists === false ? React.createElement(Alert, {
+        message: "B\u0142\u0105d. Nie istnieje u\u017Cytkownik o podanym numerze telefonu.",
+        type: "error",
         closable: true,
         onClose: this.onClose,
         className: "ant-alert-centered"

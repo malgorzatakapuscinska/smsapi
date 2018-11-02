@@ -5,6 +5,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       userRemoved: false,
+      userExists: true,
     }
   }
 
@@ -16,7 +17,9 @@ class App extends React.Component {
       if(!error) {
         axios.post("http://localhost:3001/contact/delete", phoneNumber)
           .then(response => {
-            this.setState({userRemoved: true}, () => console.log(this.state))
+            console.log(response.data);
+            (response.data !== "Contact not found") ? this.setState({userRemoved: true, userExists: false}, () => console.log(this.state)) :
+            this.setState({userRemoved: false, userExists: false}, () => console.log(this.state));
           })
       }
     })
@@ -32,6 +35,15 @@ class App extends React.Component {
             <Alert
               message="Subskrypcja anulowana. Dziękujemy za zgłoszenie"
               type="success"
+              closable
+              onClose={this.onClose}
+              className="ant-alert-centered"
+          />) : null
+        }
+        { (this.state.userExists === false) ? (
+            <Alert
+              message="Błąd. Nie istnieje użytkownik o podanym numerze telefonu."
+              type="error"
               closable
               onClose={this.onClose}
               className="ant-alert-centered"
