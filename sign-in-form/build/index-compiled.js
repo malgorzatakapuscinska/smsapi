@@ -52,18 +52,15 @@ function (_React$Component) {
               force: true
             }, function (error, values) {
               if (!error) {
-                console.log(values);
                 var stringifyValues = JSON.stringify(values);
-                console.log(stringifyValues);
                 axios.post('http://localhost:3001/contacts/add', values).then(function (response) {
-                  console.log(response);
                   response && response.data !== "500 Internal Server Error" ? _this.setState({
                     contactSaved: true,
                     serverError: ''
-                  }, console.log(_this.state)) : _this.setState({
+                  }) : _this.setState({
                     contactSaved: false,
                     serverError: response.data
-                  }, console.log(_this.state));
+                  });
                 });
               }
             });
@@ -78,22 +75,15 @@ function (_React$Component) {
           phone_number: _this.props.form.getFieldValue('phone_number'),
           email: _this.props.form.getFieldValue('email')
         };
-        console.log(valuesToValidate);
         axios.post("http://localhost:3001/validation", valuesToValidate).then(function (response) {
-          console.log('server response validation: ' + response.data);
           response.data.phone_number === 'exists' ? _this.setState({
             isPhoneExist: true
-          }, function () {
-            return console.log(_this.state);
           }) : null;
           response.data.email === 'exists' ? _this.setState({
             isEmailExist: true
-          }, function () {
-            return console.log(_this.state);
           }) : null;
           resolve('done');
         }).catch(function (error) {
-          console.log(error);
           reject(error);
         });
       });
@@ -138,11 +128,9 @@ function (_React$Component) {
         response.data !== "404 not found" ? _this2.setState({
           groups: response.data,
           serverError: ''
-        }, function () {
-          return console.log(_this2.state);
         }) : _this2.setState({
           serverError: response.data
-        }, console.log(_this2.state));
+        });
       });
     }
   }, {
@@ -155,13 +143,10 @@ function (_React$Component) {
           groups = _this$state.groups,
           contactSaved = _this$state.contactSaved,
           serverError = _this$state.serverError;
-      console.log('I am back');
-      console.log(groups);
-      console.log(this.state);
       return React.createElement("div", {
         className: "container"
       }, serverError === "404 not found" ? React.createElement(Alert, {
-        message: "Przepraszamy rejestracja jest chwilowo niemo\u017Cliwa. Spr\xF3buj ponownie p\xF3\u017Aniej",
+        message: "Przepraszamy rejestracja jest chwilowo niemo\u017Cliwa. Spr\xF3buj ponownie p\xF3\u017Aniej.",
         type: "error",
         className: "ant-alert-serverError"
       }) : React.createElement(Form, {
@@ -175,7 +160,7 @@ function (_React$Component) {
         onClose: this.onClose,
         className: "ant-alert-centered"
       }) : null, serverError === "500 Internal Server Error" ? React.createElement(Alert, {
-        message: "Przykro nam! Nie uda\u0142o si\u0119 zapisa\u0107 danych spr\xF3buj ponownie p\xF3\u017Aniej",
+        message: "Przykro nam! Nie uda\u0142o si\u0119 zapisa\u0107 danych spr\xF3buj ponownie p\xF3\u017Aniej.",
         type: "error",
         closable: true,
         onClose: this.onClose,
@@ -222,9 +207,6 @@ function (_React$Component) {
         rules: [{
           required: true,
           message: "Wpisz twój adres e-mail"
-        }, {
-          type: 'email',
-          message: 'Nieprawidłowy adres e-mail'
         }, {
           pattern: new RegExp(/^[a-z\d]+[\w\d.-]*@(?:[a-z\d]+[a-z\d-]+\.){1,5}[a-z]{2,6}$/i),
           message: "Nieprawidłowy adres e-mail"

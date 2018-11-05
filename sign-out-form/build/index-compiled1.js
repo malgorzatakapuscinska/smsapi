@@ -45,22 +45,16 @@ function (_React$Component) {
       var phoneNumber = {
         phone_number: _this.props.form.getFieldValue('phone_number')
       };
-      console.log(phoneNumber);
 
       _this.props.form.validateFields(function (error, values) {
         if (!error) {
           axios.post("http://localhost:3001/contact/delete", phoneNumber).then(function (response) {
-            console.log(response.data);
             response.data !== "Contact not found" ? _this.setState({
               userRemoved: true,
               userExists: false
-            }, function () {
-              return console.log(_this.state);
             }) : _this.setState({
               userRemoved: false,
               userExists: false
-            }, function () {
-              return console.log(_this.state);
             });
           });
         }
@@ -80,7 +74,6 @@ function (_React$Component) {
       var _this$props$form = this.props.form,
           getFieldDecorator = _this$props$form.getFieldDecorator,
           validateFields = _this$props$form.validateFields;
-      console.log(this.state);
       return React.createElement("div", {
         className: "container"
       }, React.createElement(Form, {

@@ -52,7 +52,7 @@ div.ant-alert-serverError {
   justify-content: center;
   flex-direction: column;
   max-width: 500px;
-  height: 500px;
+  max-height: 300px;
   padding: 20px;
   font-size: 18px;
   text-transform: uppercase;

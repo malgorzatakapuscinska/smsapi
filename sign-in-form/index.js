@@ -86,7 +86,7 @@ class App extends React.Component {
         {
           (serverError === "404 not found") ? (
             <Alert
-              message="Przepraszamy rejestracja jest chwilowo niemożliwa. Spróbuj ponownie później"
+              message="Przepraszamy rejestracja jest chwilowo niemożliwa. Spróbuj ponownie później."
               type="error"
               className="ant-alert-serverError"
             />
@@ -104,7 +104,7 @@ class App extends React.Component {
 
           { (serverError === "500 Internal Server Error") ? (
               <Alert
-                message="Przykro nam! Nie udało się zapisać danych spróbuj ponownie później"
+                message="Przykro nam! Nie udało się zapisać danych spróbuj ponownie później."
                 type="error"
                 closable
                 onClose={this.onClose}
@@ -134,7 +134,6 @@ class App extends React.Component {
             {getFieldDecorator("email", {
               rules: [
                 {required: true, message: "Wpisz twój adres e-mail"},
-                {type: 'email', message: 'Nieprawidłowy adres e-mail' },
                 {pattern: new RegExp(/^[a-z\d]+[\w\d.-]*@(?:[a-z\d]+[a-z\d-]+\.){1,5}[a-z]{2,6}$/i), message: "Nieprawidłowy adres e-mail"},
                 {validator: this.validateEmail}
               ],
