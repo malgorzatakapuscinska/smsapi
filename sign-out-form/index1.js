@@ -12,14 +12,12 @@ class App extends React.Component {
   handlesubmit = (event) => {
     event.preventDefault();
     const phoneNumber = {phone_number: this.props.form.getFieldValue('phone_number')};
-    console.log(phoneNumber);
     this.props.form.validateFields((error, values) => {
       if(!error) {
         axios.post("http://localhost:3001/contact/delete", phoneNumber)
           .then(response => {
-            console.log(response.data);
-            (response.data !== "Contact not found") ? this.setState({userRemoved: true, userExists: false}, () => console.log(this.state)) :
-            this.setState({userRemoved: false, userExists: false}, () => console.log(this.state));
+            (response.data !== "Contact not found") ? this.setState({userRemoved: true, userExists: false}) :
+            this.setState({userRemoved: false, userExists: false});
           })
       }
     })
@@ -27,7 +25,6 @@ class App extends React.Component {
 
   render () {
     const {getFieldDecorator, validateFields} = this.props.form;
-    console.log(this.state);
     return (
       <div className="container">
         <Form layout="horizontal" onSubmit={this.handlesubmit} className="ant-form--centered">

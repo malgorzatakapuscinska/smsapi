@@ -16,8 +16,8 @@ class App extends React.Component {
     axios.get("http://localhost:3001/groups")
       .then((response) => {
         (response.data !== "404 not found") ?
-        this.setState({groups: response.data, serverError: ''}, () => console.log(this.state)) :
-        this.setState({serverError: response.data}, console.log(this.state));
+        this.setState({groups: response.data, serverError: ''}) :
+        this.setState({serverError: response.data});
       })
   }
 
@@ -29,15 +29,12 @@ class App extends React.Component {
         .then((value) => {
             this.props.form.validateFields({force: true},(error,values) => {
                 if (!error) {
-                  console.log(values);
                   const stringifyValues = JSON.stringify(values);
-                  console.log(stringifyValues);
                   axios.post('http://localhost:3001/contacts/add',values)
                     .then((response) => {
-                      console.log(response);
                       (response && response.data !== "500 Internal Server Error") ?
-                      this.setState({contactSaved: true, serverError: ''}, console.log(this.state)) :
-                      this.setState({contactSaved: false, serverError: response.data}, console.log(this.state));
+                      this.setState({contactSaved: true, serverError: ''}) :
+                      this.setState({contactSaved: false, serverError: response.data});
                     });
                 }
             })
@@ -49,18 +46,15 @@ class App extends React.Component {
   isPhoneAndEmailExist = () => {
     return new Promise((resolve, reject) => {
       const valuesToValidate = {phone_number: this.props.form.getFieldValue('phone_number'), email: this.props.form.getFieldValue('email')};
-      console.log(valuesToValidate);
       axios.post("http://localhost:3001/validation", valuesToValidate)
       .then((response) => {
-        console.log('server response validation: ' + response.data);
         (response.data.phone_number === 'exists') ?
-        this.setState({isPhoneExist: true}, () => console.log(this.state)) : null;
+        this.setState({isPhoneExist: true}) : null;
         (response.data.email === 'exists') ?
-        this.setState({isEmailExist: true}, () => console.log(this.state)) : null;
+        this.setState({isEmailExist: true}) : null;
         resolve('done');
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       })
     })
@@ -87,9 +81,6 @@ class App extends React.Component {
   render () {
     const {getFieldDecorator, validateFields} = this.props.form;
     const {groups, contactSaved, serverError} = this.state;
-    console.log('I am back');
-    console.log(groups);
-    console.log(this.state);
     return (
       <div className="container">
         {
